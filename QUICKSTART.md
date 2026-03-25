@@ -13,7 +13,7 @@ Get VM Manager up and running in minutes!
 
 ### Step 1: Clone Repository
 ```bash
-git clone https://github.com/yourusername/vm-manager.git
+git clone https://github.com/johan240684/vm-manager.git
 cd vm-manager
 ```
 

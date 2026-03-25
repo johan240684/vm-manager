@@ -15,8 +15,8 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
     # CORS
-    CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8000"]
-    ALLOWED_HOSTS: List[str] = ["localhost", "127.0.0.1", "0.0.0.0"]
+    CORS_ORIGINS: str = "http://localhost:3000,http://localhost:8000"
+    ALLOWED_HOSTS: str = "localhost,127.0.0.1,0.0.0.0"
     
     # Database
     DATABASE_URL: str = "sqlite:///./vm_manager.db"
@@ -40,5 +40,13 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+
+    @property
+    def cors_origins_list(self) -> List[str]:
+        return [item.strip() for item in self.CORS_ORIGINS.split(",") if item.strip()]
+
+    @property
+    def allowed_hosts_list(self) -> List[str]:
+        return [item.strip() for item in self.ALLOWED_HOSTS.split(",") if item.strip()]
 
 settings = Settings()
