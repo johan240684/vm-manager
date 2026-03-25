@@ -6,6 +6,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     build-essential \
     pkg-config \
+    openssh-client \
     libvirt-dev \
     && rm -rf /var/lib/apt/lists/*
 

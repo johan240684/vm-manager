@@ -24,10 +24,15 @@ class HypervisorService:
             logger.info(f"Successfully connected to {self.uri}")
             return True
         except libvirt.libvirtError as e:
-            logger.error(f"Libvirt error: {e}")
+            error_message = str(e)
+            logger.error(f"Libvirt connection failed for URI '{self.uri}': {error_message}")
+            if "Cannot find 'ssh' in path" in error_message:
+                logger.error("Install openssh-client in the container or switch LIBVIRT_URI to qemu:///system")
+            if "authentication" in error_message.lower():
+                logger.error("Verify remote libvirt credentials/keys for the configured LIBVIRT_URI")
             return False
         except Exception as e:
-            logger.error(f"Connection error: {e}")
+            logger.error(f"Unexpected connection error for URI '{self.uri}': {e}")
             return False
     
     def disconnect(self):

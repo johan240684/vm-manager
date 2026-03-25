@@ -21,8 +21,11 @@ async def lifespan(app: FastAPI):
     global hypervisor_service
     logger.info("Starting VM Manager application...")
     hypervisor_service = HypervisorService()
-    hypervisor_service.connect()
-    logger.info("Connected to hypervisor")
+    connected = hypervisor_service.connect()
+    if connected:
+        logger.info("Connected to hypervisor")
+    else:
+        logger.warning("Hypervisor connection unavailable at startup; API will run in degraded mode")
     yield
     logger.info("Shutting down VM Manager application...")
     if hypervisor_service:
