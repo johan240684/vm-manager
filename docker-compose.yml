@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: vm-manager-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - FASTAPI_ENV=production
+      - DEBUG=false
+      - DATABASE_URL=sqlite:///./vm_manager.db
+      - LIBVIRT_URI=qemu+ssh://root@localhost/system
+      - REDIS_URL=redis://redis:6379
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:8000
+    volumes:
+      - ./backend/app:/app/app
+      - backend_data:/app
+      # Mount libvirt socket for VM management
+      - /var/run/libvirt/libvirt-sock:/var/run/libvirt/libvirt-sock:rw
+    depends_on:
+      - redis
+    networks:
+      - vm-manager-network
+    restart: unless-stopped
+
+  # Frontend UI
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: vm-manager-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - vm-manager-network
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: vm-manager-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - vm-manager-network
+    restart: unless-stopped
+
+  # PostgreSQL Database (optional - for production)
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: vm-manager-db
+  #   environment:
+  #     POSTGRES_USER: vmmanager
+  #     POSTGRES_PASSWORD: vmmanager_pass
+  #     POSTGRES_DB: vmmanager
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   networks:
+  #     - vm-manager-network
+  #   restart: unless-stopped
+
+volumes:
+  backend_data:
+  redis_data:
+  # postgres_data:
+
+networks:
+  vm-manager-network:
+    driver: bridge
